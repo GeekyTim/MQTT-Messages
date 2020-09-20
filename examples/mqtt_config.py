@@ -1,8 +1,8 @@
-# MQTT-Messages Configuration Definition
+# MQTTMessages Configuration Definition
 # 2020-09-09
 
 """
-Include this file in all programs you use with MQTT-Messages
+Include this file in all programs you use with MQTT-MQTTMessages
 """
 mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
                          "port": 8883,
@@ -11,12 +11,12 @@ mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
                          "tlsversion": 2,
                          "certfile": "/home/pi/mqtt-ca.crt"},
               "thisclient": {"devicetypes": ("MotePi"),
-                        "deviceid": "MotePi",
-                        "username": "MotePi",
-                        "password": "MotePi",
-                        "version": 1.1},
+                             "deviceid": "MotePi",
+                             "username": "MotePi",
+                             "password": "MotePi",
+                             "version": 1.1},
               "subscribeto": [{"name": "ExampleQueue",
-			                   "definition": {"topic": "Area/what", "qos": 2}}],
+                               "definition": {"topic": "Area/what", "qos": 2}}],
               "publishto": [{"name": "AnotherExample",
-			                   "definition": {"topic": "Area/what", "qos": 2, "devicetypes": ("devicename")}}]
+                             "definition": {"topic": "Area/what", "qos": 2, "devicetypes": ("devicename")}}]
               }

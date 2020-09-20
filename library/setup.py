@@ -36,7 +36,7 @@ classifiers = ['Development Status :: 4 - Beta',
                'Topic :: System :: Hardware']
 
 setup(
-    name='mqtt-messages',
+    name='MQTTMessages',
     version='0.1.0',
     author='Tim Richardson',
     author_email='tim@potton.me.uk',
@@ -46,6 +46,6 @@ setup(
     keywords='Raspberry Pi MQTT',
     url='http://github.com/GeekyTim/MQTT-Messages',
     classifiers=classifiers,
-    packages=['mqtt-messages'],
-    install_requires=['paho-mqtt', "jsondict"]
+    packages=['MQTTMessages'],
+    install_requires=['paho-mqtt', 'jsondict']
 )

@@ -4,7 +4,7 @@ import os.path
 import paho.mqtt.client as mqtt
 
 
-class Messages:
+class MQTTMessages:
     """
     Creates an MQTT message handler which can send (publish) or receive (subscribe) to MQTT messages,
     and ensures they are destined for this device as well as being correctly formatted.

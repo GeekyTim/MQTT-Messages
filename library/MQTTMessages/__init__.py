@@ -1,8 +1,7 @@
 """
-.. module:: MQTT-Messages
+.. module:: MQTT-MQTTMessages
    :platform: Unix
    :synopsis: For handling MQTT messages.
 """
 
-from .mqtt_messages import Messages
-
+from .MQTTMessages import MQTTMessages
