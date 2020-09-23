@@ -83,46 +83,46 @@ class MQTTMessages:
             raise ValueError("The MQTT definition is not compatible with this library version.")
 
         try:
-	        # This device
-	        self.__device = mqttconfig["thisclient"]["deviceid"]
-	        self.__version = mqttconfig["thisclient"]["version"]
-	        self.__user = mqttconfig["thisclient"]["username"]
-	        self.__password = mqttconfig["thisclient"]["password"]
-	        if "devicetypes" in mqttconfig["thisclient"]:
-	            self.__devicetypes = mqttconfig["thisclient"]["devicetypes"]
-	        else:
-	            self.__devicetypes = ""
+            # This device
+            self.__device = mqttconfig["thisclient"]["deviceid"]
+            self.__version = mqttconfig["thisclient"]["version"]
+            self.__user = mqttconfig["thisclient"]["username"]
+            self.__password = mqttconfig["thisclient"]["password"]
+            if "devicetypes" in mqttconfig["thisclient"]:
+                self.__devicetypes = mqttconfig["thisclient"]["devicetypes"]
+            else:
+                self.__devicetypes = ""
 
-	        # The MQTT Broker
-	        self.__host = mqttconfig["broker"]["host"]
-	        self.__port = mqttconfig["broker"]["port"]
-	        self.__transport = mqttconfig["broker"]["transport"]
-	        self.__keepalive = mqttconfig["broker"]["keepalive"]
+            # The MQTT Broker
+            self.__host = mqttconfig["broker"]["host"]
+            self.__port = mqttconfig["broker"]["port"]
+            self.__transport = mqttconfig["broker"]["transport"]
+            self.__keepalive = mqttconfig["broker"]["keepalive"]
 
-	        self.__certfile = None
-	        if self.__transport.lower() == "tcp":
-	            self.__tlsversion = mqttconfig["broker"]["tlsversion"]
+            self.__certfile = None
+            if self.__transport.lower() == "tcp":
+                self.__tlsversion = mqttconfig["broker"]["tlsversion"]
 
-	            if "certfile" in mqttconfig["broker"]:
-	                if os.path.isfile(mqttconfig["broker"]["certfile"]):
-	                    self.__certfile = mqttconfig["broker"]["certfile"]
-	                else:
-	                    raise AttributeError("The certificate file does not exist.")
+                if "certfile" in mqttconfig["broker"]:
+                    if os.path.isfile(mqttconfig["broker"]["certfile"]):
+                        self.__certfile = mqttconfig["broker"]["certfile"]
+                    else:
+                        raise AttributeError("The certificate file does not exist.")
 
-	        # The queues that can be published to
-	        self.__publishqueues = mqttconfig["publishto"]
+            # The queues that can be published to
+            self.__publishqueues = mqttconfig["publishto"]
 
-	        # Queues to listen to
-	        self.__listenqueues = mqttconfig["subscribeto"]
+            # Queues to listen to
+            self.__listenqueues = mqttconfig["subscribeto"]
 
-	        self.__handlerclass = handlerclass
+            self.__handlerclass = handlerclass
 
-	        # For logging results
-	        self.__lastlog = ""
+            # For logging results
+            self.__lastlog = ""
 
-	        # Start listening to the queue
-	        self.__client = self.__startmqtt()
-	        self.__client.loop_start()
+            # Start listening to the queue
+            self.__client = self.__startmqtt()
+            self.__client.loop_start()
         except:
             raise ValueError("There is a problem with the provided configuration.")
 
