@@ -78,11 +78,11 @@ class MQTTMessages:
     }
     }
 
-    def __init__(self, mqttconfig, handlerclass):
-        if mqttconfig["thisclient"]["version"] != self.__libversion:
-            raise ValueError("The MQTT definition is not compatible with this library version.")
-
+    def __init__(self, mqttconfig, handlerclass=None):
         try:
+            if mqttconfig["thisclient"]["version"] != self.__libversion:
+                raise ValueError("The MQTT definition is not compatible with this library version.")
+
             # This device
             self.__device = mqttconfig["thisclient"]["deviceid"]
             self.__version = mqttconfig["thisclient"]["version"]
@@ -155,7 +155,8 @@ class MQTTMessages:
 
         # Methods to call on MQTT events
         startclient.on_connect = self.__on_connect
-        startclient.on_message = self.__on_message
+        if self.__handlerclass is not None:
+            startclient.on_message = self.__on_message
         startclient.on_publish = self.__on_publish
         startclient.on_log = self.__on_log
 
@@ -299,23 +300,12 @@ class MQTTMessages:
                 message = self.__mqttmessageformat
                 message["mqttmessage"]["payload"]["what"] = what
                 message["mqttmessage"]["payload"]["params"] = paramdict
-                message["mqttmessage"]["devicetype"] = self.__publishqueues["name" == queuename]["definition"][
-                    "devicetype"]
+                message["mqttmessage"]["devicetypes"] = self.__publishqueues["name" == queuename]["definition"][
+                    "devicetypes"]
                 messagejson = self.__makeJsonMessage(message)
             else:
                 self.__log("The parameters supplied were not a dictonary or 'None'.")
         return messagejson
-
-    def sendmessage(self, sendqueuename, what, paramdict):
-        for queue in self.__publishqueues:
-            if queue["name"] == sendqueuename:
-                message = self.__makemessage(sendqueuename, what, paramdict)
-                if len(message) > 0:
-                    self.__client.publish(self.__publishqueues["name" == sendqueuename]["definition"]["topic"], message,
-                                          self.__publishqueues["name" == sendqueuename]["definition"]["qos"],
-                                          retain=False)
-                else:
-                    self.__log("The message could not be sent")
 
     @staticmethod
     def __makeJsonMessage(messagedict):
@@ -332,6 +322,17 @@ class MQTTMessages:
     # ==================================================================================================================
     # Public Methods
     # ==================================================================================================================
+    def sendmessage(self, sendqueuename, what, paramdict):
+        for queue in self.__publishqueues:
+            if queue["name"] == sendqueuename:
+                message = self.__makemessage(sendqueuename, what, paramdict)
+                if len(message) > 0:
+                    self.__client.publish(self.__publishqueues["name" == sendqueuename]["definition"]["topic"], message,
+                                          self.__publishqueues["name" == sendqueuename]["definition"]["qos"],
+                                          retain=False)
+                else:
+                    self.__log("The message could not be sent")
+
 
     def getlastlog(self):
         """

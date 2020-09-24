@@ -10,7 +10,7 @@ mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
                          "transport": "tcp",
                          "tlsversion": 2,
                          "certfile": "/home/pi/mqtt-ca.crt"},
-              "thisclient": {"devicetypes": ("MotePi"),
+              "thisclient": {"devicetypes": ["MotePi"],
                              "deviceid": "MotePi",
                              "username": "MotePi",
                              "password": "MotePi",
@@ -18,5 +18,5 @@ mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
               "subscribeto": [{"name": "ExampleQueue",
                                "definition": {"topic": "Area/what", "qos": 2}}],
               "publishto": [{"name": "AnotherExample",
-                             "definition": {"topic": "Area/what", "qos": 2, "devicetypes": ("devicename")}}]
+                             "definition": {"topic": "Area/what", "qos": 2, "devicetypes": ["devicename"]}}]
               }
