@@ -327,17 +327,14 @@ class MQTTMessages:
             if queue["name"] == sendqueuename:
                 message = self.__makemessage(sendqueuename, what, paramdict)
                 if len(message) > 0:
-                    self.__client.publish(self.__publishqueues["name" == sendqueuename]["definition"]["topic"], message,
-                                          self.__publishqueues["name" == sendqueuename]["definition"]["qos"],
+                    self.__client.publish(queue["definition"]["topic"], message, queue["definition"]["qos"],
                                           retain=False)
                 else:
                     self.__log("The message could not be sent")
 
-
     def getlastlog(self):
         """
-        REturns the last message logged. Useful for debugging.
-
+        Returns the last message logged. Useful for debugging.
         :return: string
         """
         return self.__lastlog
