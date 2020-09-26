@@ -10,12 +10,12 @@ mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
                          "transport": "tcp",
                          "tlsversion": 2,
                          "certfile": "/home/pi/mqtt-serv.crt"},
-              "thisclient": {"devicetypes": ("MotePi", "another"),
+              "thisclient": {"devicetypes": ["MotePi", "another"],
                              "deviceid": "testclient",
                              "username": "testclient",
                              "password": "testclient",
                              "version": 1.1},
               "subscribeto": [],
               "publishto": [{"name": "LavaLamp",
-                             "definition": {"topic": "MotePi/command", "qos": 2, "devicetypes": ("MotePi", "other")}}]
+                             "definition": {"topic": "MotePi/command", "qos": 2, "devicetypes": ["MotePi", "other"]}}]
               }
