@@ -1,6 +1,6 @@
 # MQTTMessages
 A helper class for MQTT
 
-Download from Hithum and run 
+Download from GitHub and run 
 
     sudo bash ./install.sh
