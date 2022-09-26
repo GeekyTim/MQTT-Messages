@@ -2,6 +2,8 @@ import json
 import os.path
 
 import paho.mqtt.client as mqtt
+from time import sleep
+import ssl
 
 
 class MQTTMessages:
@@ -70,9 +72,9 @@ class MQTTMessages:
 
     __mqttmessageformat = {"mqttmessage": {
         "devicetypes": (),
-        "version": __libversion,
-        "payload": {
-            "what": "whattodo",
+        "version"    : __libversion,
+        "payload"    : {
+            "what"  : "whattodo",
             "params": {}
         }
     }
@@ -108,6 +110,9 @@ class MQTTMessages:
                         self.__certfile = mqttconfig["broker"]["certfile"]
                     else:
                         raise AttributeError("The certificate file does not exist.")
+
+                if "selfcert" in mqttconfig["broker"]:
+                    self.__selfcert = mqttconfig["broker"]["selfcert"]
 
             # The queues that can be published to
             self.__publishqueues = mqttconfig["publishto"]
@@ -146,7 +151,10 @@ class MQTTMessages:
             # Set the security
             if self.__tlsversion is not None:
                 if self.__certfile is not None:
-                    startclient.tls_set(self.__certfile, tls_version=self.__tlsversion)
+                    if self.__selfcert:
+                        startclient.tls_set(self.__certfile, tls_version=self.__tlsversion, cert_reqs=ssl.CERT_NONE)
+                    else:
+                        startclient.tls_set(self.__certfile, tls_version=self.__tlsversion)
                 else:
                     startclient.tls_set(tls_version=self.__tlsversion)
 
@@ -167,6 +175,7 @@ class MQTTMessages:
                 break
             except:
                 self.__log("Unable to connect to the MQTT Broker.")
+                sleep(5)
 
         return startclient
 
