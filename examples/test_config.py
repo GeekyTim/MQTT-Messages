@@ -15,7 +15,7 @@ mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
                              "deviceid": "testclient",
                              "username": "testclient",
                              "password": "testclient",
-                             "version": 1.1},
+                             "version": 1.2},
               "subscribeto": [],
               "publishto": [{"name": "LavaLamp",
                              "definition": {"topic": "MotePi/command", "qos": 2, "devicetypes": ["MotePi", "other"]}}]

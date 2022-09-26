@@ -37,7 +37,7 @@ classifiers = ['Development Status :: 4 - Beta',
 
 setup(
     name='MQTTMessages',
-    version='0.1.1',
+    version='0.1.2',
     author='Tim Richardson',
     author_email='tim@potton.me.uk',
     description="""Python library for setting up and handling MQTT messages with a pre-described format""",
