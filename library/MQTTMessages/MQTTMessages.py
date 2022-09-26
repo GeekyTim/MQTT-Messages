@@ -69,7 +69,7 @@ class MQTTMessages:
         A class that contains a method called 'messagehandler' which takes two parameters.
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
     """
-    __libversion = 1.1
+    __libversion = 1.2
 
     __mqttmessageformat = {"mqttmessage": {
         "devicetypes": (),
