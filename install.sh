@@ -1,6 +1,6 @@
 #!/bin/bash
 
-scriptpath=${BASH_SOURCE[0]}
+scriptpath=$(dirname "$0")
 
 sudo apt-get update
 sudo apt-get install python3-pip -y
