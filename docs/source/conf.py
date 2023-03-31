@@ -23,7 +23,6 @@ sys.modules['PIL'] = mock.Mock()
 sys.modules['atexit'] = mock.Mock()
 
 sys.path.insert(0, '../../library')
-from pixelpi import Strip
 
 
 class OutlineMethodDocumenter(autodoc.MethodDocumenter):
@@ -124,7 +123,7 @@ html_theme = 'sphinx_rtd_theme'
 #
 html_theme_options = {
     'collapse_navigation': False,
-    'display_version': True
+    'display_version'    : True
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

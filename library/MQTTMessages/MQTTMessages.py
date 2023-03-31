@@ -223,15 +223,15 @@ class MQTTMessages:
         """
         Converts a JSON string, received from MQTT. to a python dictionary
         """
-        message = ""
+
         try:
             message_json = jsonmessage.payload.decode("utf-8")
             message = json.loads(message_json)
         except:
             self.__log("Unable to interpret the MQTT message:" + jsonmessage)
             message = {}
-        finally:
-            return message
+
+        return message
 
     @staticmethod
     def __ismqttmessage(message):
@@ -247,8 +247,8 @@ class MQTTMessages:
         """
         response = False
         if "devicetypes" in message["mqttmessage"]:
-            for type in message["mqttmessage"]["devicetypes"]:
-                if type in self.__devicetypes:
+            for devicetype in message["mqttmessage"]["devicetypes"]:
+                if devicetype in self.__devicetypes:
                     response = True
                     break
 
@@ -312,13 +312,13 @@ class MQTTMessages:
                 message["mqttmessage"]["payload"]["params"] = paramdict
                 message["mqttmessage"]["devicetypes"] = self.__publishqueues["name" == queuename]["definition"][
                     "devicetypes"]
-                messagejson = self.__makeJsonMessage(message)
+                messagejson = self.__make_json_message(message)
             else:
                 self.__log("The parameters supplied were not a dictonary or 'None'.")
         return messagejson
 
     @staticmethod
-    def __makeJsonMessage(messagedict):
+    def __make_json_message(messagedict):
         try:
             message = json.dumps(messagedict)
         except:
