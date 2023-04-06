@@ -1,6 +1,5 @@
-Strip Driver Board
-====================
-
+MQTT-Messages
+=============
 
 Installing
 ----------
@@ -13,24 +12,30 @@ Download the library from GitHub, either using GIT (if you have it installed):
 
 .. code:: bash
 
-    git clone https://github.com/GeekyTim/PixelPiLibrary
+    git clone https://github.com/GeekyTim/MQTT-Messages
     
 Or download the ZIP from GitHub and unzip it:
+
 .. code:: bash
 
-    wget https://github.com/GeekyTim/PixelPiLibrary/archive/master.zip
+    wget https://github.com/GeekyTim/MQTT-Messages/archive/master.zip
     
 
 Installing the Library
 ~~~~~~~~~~~~~~~~~~~~~~
+In a bash shell, run the following:
+
+.. code:: bash
+
+    cd MQTT-Messages
+    bash install.sh
 
 
-
-Using Strip
+Using the Library
 ~~~~~~~~~~~~~
 
 Examples can be found in:
-``/home/pi/PixelPiLibrary/examples/``.
+``/MQTT-Messages/examples/``.
 
 
 Documentation & Support
