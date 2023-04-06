@@ -1,3 +1,7 @@
 0.1.0
 -----
 * This library has been in development for a little while - only just deciding to put it in public.
+
+0.1.3
+-----
+Added hostname to sent messages.

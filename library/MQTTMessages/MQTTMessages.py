@@ -1,9 +1,10 @@
 import json
 import os.path
+import socket
+import ssl
+from time import sleep
 
 import paho.mqtt.client as mqtt
-from time import sleep
-import ssl
 
 
 class MQTTMessages:
@@ -69,25 +70,31 @@ class MQTTMessages:
         A class that contains a method called 'messagehandler' which takes two parameters.
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
     """
-    __libversion = 1.2
+    __libversion = 1.3
 
-    __mqttmessageformat = {"mqttmessage": {
-        "devicetypes": (),
-        "version"    : __libversion,
-        "payload"    : {
-            "what"  : "whattodo",
-            "params": {}
+    __hostname = socket.gethostname()
+
+    __mqttmessageformat = {
+        "mqttmessage": {
+            "devicetypes": [],
+            "version": __libversion,
+            "payload": {
+                "host": __hostname,
+                "what": "whattodo",
+                "params": {}
+            }
         }
-    }
     }
 
     def __init__(self, mqttconfig, handlerclass=None):
         try:
-            if mqttconfig["thisclient"]["version"] != self.__libversion:
-                raise ValueError("The MQTT definition is not compatible with this library version.")
+            if mqttconfig["thisclient"]["version"] > self.__libversion:
+                raise ValueError(
+                    f"The MQTT definition is not compatible with this library version. Please upgrade MQTT-Messages.\n"
+                    f"Installed version: {self.__libversion}, Expected Version: {mqttconfig['thisclient']['version']}")
 
             # This device
-            self.__device = mqttconfig["thisclient"]["deviceid"]
+            self.__deviceid = mqttconfig["thisclient"]["deviceid"]
             self.__version = mqttconfig["thisclient"]["version"]
             self.__user = mqttconfig["thisclient"]["username"]
             self.__password = mqttconfig["thisclient"]["password"]
@@ -106,14 +113,15 @@ class MQTTMessages:
             if self.__transport.lower() == "tcp":
                 self.__tlsversion = mqttconfig["broker"]["tlsversion"]
 
-                if "certfile" in mqttconfig["broker"]:
-                    if os.path.isfile(mqttconfig["broker"]["certfile"]):
-                        self.__certfile = mqttconfig["broker"]["certfile"]
-                    else:
-                        raise AttributeError("The certificate file does not exist.")
+            if "certfile" in mqttconfig["broker"]:
+                if os.path.isfile(mqttconfig["broker"]["certfile"]):
+                    self.__certfile = mqttconfig["broker"]["certfile"]
+            else:
+                raise AttributeError(f"The certificate file does not exist.\n"
+                                     f"Expected Location: {mqttconfig['broker']['certfile']}")
 
-                if "selfcert" in mqttconfig["broker"]:
-                    self.__selfcert = mqttconfig["broker"]["selfcert"]
+            if "selfcert" in mqttconfig["broker"]:
+                self.__selfcert = mqttconfig["broker"]["selfcert"]
 
             # The queues that can be published to
             self.__publishqueues = mqttconfig["publishto"]
@@ -126,11 +134,32 @@ class MQTTMessages:
             # For logging results
             self.__lastlog = ""
 
+            # __On_Connect responses
+            self.__ocuserdata = None
+            self.__ocflags = None
+            self.__ocrc = None
+
+            # __on_log responses
+            self.__olclient = None
+            self.__olobj = None
+            self.__ollevel = None
+
+            # __on_publish
+            self.__opclient = None
+            self.__opobj = None
+            self.__opmid = None
+
+            # __on_message
+            self.__omclient = None
+            self.__omuserdata = None
+
             # Start listening to the queue
             self.__client = self.__startmqtt()
             self.__client.loop_start()
-        except:
-            raise ValueError("There is a problem with the provided configuration.")
+
+        except Exception as err:
+            print(f"There is a problem with the provided configuration.\n{err}")
+            exit(1)
 
     # ==================================================================================================================
     # Private Methods
@@ -146,37 +175,44 @@ class MQTTMessages:
         This will fail with an error of the connection has been tried 10 times without success.
         """
         # Creates the MQTT object for this client
-        startclient = mqtt.Client(client_id=self.__device, clean_session=True, transport=self.__transport)
+        try:
+            startclient = mqtt.Client(client_id=self.__deviceid, clean_session=True, transport=self.__transport)
 
-        if self.__transport.lower() == "tcp":
-            # Set the security
-            if self.__tlsversion is not None:
-                if self.__certfile is not None:
-                    if self.__selfcert:
-                        startclient.tls_set(self.__certfile, tls_version=self.__tlsversion, cert_reqs=ssl.CERT_NONE)
+            if self.__transport.lower() == "tcp":
+                # Set the security
+                if self.__tlsversion is not None:
+                    if self.__certfile is not None:
+                        if self.__selfcert:
+                            startclient.tls_set(self.__certfile, tls_version=self.__tlsversion, cert_reqs=ssl.CERT_NONE)
+                        else:
+                            startclient.tls_set(self.__certfile, tls_version=self.__tlsversion)
                     else:
-                        startclient.tls_set(self.__certfile, tls_version=self.__tlsversion)
-                else:
-                    startclient.tls_set(tls_version=self.__tlsversion)
+                        startclient.tls_set(tls_version=self.__tlsversion)
 
-        if self.__user is not None:
-            startclient.username_pw_set(username=self.__user, password=self.__password)
+            if self.__user is not None:
+                startclient.username_pw_set(username=self.__user, password=self.__password)
 
-        # Methods to call on MQTT events
-        startclient.on_connect = self.__on_connect
-        if self.__handlerclass is not None:
-            startclient.on_message = self.__on_message
-        startclient.on_publish = self.__on_publish
-        startclient.on_log = self.__on_log
+            # Methods to call on MQTT events
+            startclient.on_connect = self.__on_connect
 
-        # Attempt to connect the broker
-        while True:
-            try:
-                startclient.connect(host=self.__host, port=self.__port, keepalive=self.__keepalive)
-                break
-            except:
-                self.__log("Unable to connect to the MQTT Broker.")
-                sleep(5)
+            if self.__handlerclass is not None:
+                startclient.on_message = self.__on_message
+
+            startclient.on_publish = self.__on_publish
+            startclient.on_log = self.__on_log
+
+            # Attempt to connect the broker
+            while True:
+                try:
+                    startclient.connect(host=self.__host, port=self.__port, keepalive=self.__keepalive)
+                    break
+                except Exception as err:
+                    self.__log(f"Unable to connect to the MQTT Broker: {err}.")
+                    sleep(5)
+
+        except Exception as err:
+            self.__log(f"Unable to start MQTT-Messages.\nError: {err}")
+            startclient = None
 
         return startclient
 
@@ -186,6 +222,9 @@ class MQTTMessages:
         Subscribing in __on_connect() means that if the client loses the connection and
         reconnect then subscriptions will be renewed.
         """
+        self.__ocuserdata = userdata
+        self.__ocflags = flags
+        self.__ocrc = rc
 
         for queue in self.__listenqueues:
             client.subscribe(topic=queue["definition"]["topic"], qos=queue["definition"]["qos"])
@@ -194,12 +233,14 @@ class MQTTMessages:
         """
         When a message is received, ensure that it is the correct format and
         call the message handler in the controlling class.
-        :type client: object
-        :type userdata: object
-        :type msg: string
+        :type client: mqtt.client
+        :type userdata: mqtt.userdata
+        :type msg: mqtt.MQTTMessage
         """
+        self.__omclient = client
+        self.__omuserdata = userdata
 
-        payload = self.__getpayloadcontents(msg)
+        payload = self.__getpayload(msg.payload)
 
         if payload != {}:
             self.__log("Payload received")
@@ -209,11 +250,18 @@ class MQTTMessages:
 
     def __on_publish(self, client, obj, mid):
         """ What to do when a message is published """
+        self.__opclient = client
+        self.__opobj = obj
+        self.__opmid = mid
+
         self.__log("Payload sent")
 
     def __on_log(self, client, obj, level, string):
         """ When a log is required """
         self.__log(string)
+        self.__olclient = client
+        self.__olobj = obj
+        self.__ollevel = level
 
     # ------------------------------------------------------------------------------------------------------------------
     # Message Checking and Generation
@@ -227,9 +275,9 @@ class MQTTMessages:
         try:
             message_json = jsonmessage.payload.decode("utf-8")
             message = json.loads(message_json)
-        except:
-            self.__log("Unable to interpret the MQTT message:" + jsonmessage)
-            message = {}
+        except Exception as err:
+            self.__log(f"Unable to interpret the MQTT message: {jsonmessage}\n({err})")
+            message = None
 
         return message
 
@@ -280,11 +328,11 @@ class MQTTMessages:
 
         return response
 
-    def __getpayloadcontents(self, mqttmessage):
+    def __getpayload(self, mqttmessage):
         """
         Extracts the message from MQTT queue message
         """
-        payload = {}
+        payload = None
 
         try:
             message_json = self.__jsontodict(mqttmessage)
@@ -294,8 +342,9 @@ class MQTTMessages:
                     if self.__isrightversion(message_json):
                         if self.__haspayload(message_json):
                             payload = message_json["mqttmessage"]["payload"]
-        except:
-            self.__log("Unable to read the received message.")
+        except Exception as err:
+            self.__log(f"Unable to read the received message. ({err})")
+            payload = None
 
         return payload
 
@@ -314,15 +363,15 @@ class MQTTMessages:
                     "devicetypes"]
                 messagejson = self.__make_json_message(message)
             else:
-                self.__log("The parameters supplied were not a dictonary or 'None'.")
+                self.__log("The parameters supplied were not a dictionary or 'None'.")
         return messagejson
 
-    @staticmethod
-    def __make_json_message(messagedict):
+    def __make_json_message(self, messagedict):
         try:
             message = json.dumps(messagedict)
-        except:
-            message = ""
+        except Exception as err:
+            self.__log(f"Unable to convert a message dictionary into JSON.\n{err}")
+            message = None
         return message
 
     def __log(self, message):
