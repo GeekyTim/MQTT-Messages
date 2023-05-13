@@ -70,7 +70,7 @@ class MQTTMessages:
         A class that contains a method called 'messagehandler' which takes two parameters.
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
     """
-    __libversion = 1.3
+    __libversion = 1.4
 
     __hostname = socket.gethostname()
 
@@ -273,8 +273,7 @@ class MQTTMessages:
         """
 
         try:
-            message_json = jsonmessage.payload.decode("utf-8")
-            message = json.loads(message_json)
+            message = json.loads(jsonmessage)
         except Exception as err:
             self.__log(f"Unable to interpret the MQTT message: {jsonmessage}\n({err})")
             message = None

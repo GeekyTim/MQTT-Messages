@@ -15,7 +15,7 @@ mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
                              "deviceid": "MotePi",
                              "username": "MotePi",
                              "password": "MotePi",
-                             "version": 1.2},
+                             "version": 1.4},
               "subscribeto": [{"name": "ExampleQueue", "definition": {"topic": "Area/what", "qos": 2}}],
               "publishto": [{"name": "AnotherExample",
                              "definition": {"topic": "Area/what", "qos": 2, "devicetypes": ["devicename"]}}]
