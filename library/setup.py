@@ -44,7 +44,7 @@ setup(
     long_description=open('README.rst').read() + '\n' + open('CHANGELOG.txt').read(),
     license='MIT',
     keywords='Raspberry Pi MQTT',
-    url='http://github.com/GeekyTim/MQTT-Messages',
+    url='http://github.com/GeekyTim/MQTTMessages.git',
     classifiers=classifiers,
     packages=['MQTTMessages'],
     install_requires=['paho-mqtt', 'jsondict']
