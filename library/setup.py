@@ -47,5 +47,5 @@ setup(
     url='http://github.com/GeekyTim/MQTTMessages.git',
     classifiers=classifiers,
     packages=['MQTTMessages'],
-    install_requires=['paho-mqtt', 'jsondict']
+    install_requires=['paho-mqtt']
 )

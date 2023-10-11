@@ -9,18 +9,19 @@ import paho.mqtt.client as mqtt
 
 class MQTTMessages:
     """
-    Creates an MQTT message handler which can send (publish) or receive (subscribe) to MQTT messages,
+    Creates an MQTT message handler that can send (publish) or receive (subscribe) to MQTT messages,
     and ensures they are destined for this device as well as being correctly formatted.
 
     :type mqttconfig: dict
     :param mqttconfig:
         A specially formatted dictionary that defines the MQTT broker, which topics are to be subscribed to
-        and which topics can be published to.  Each topic has a unique name identifier, which means the
-        underlying topics can be changed in the configuration without changing your code.
+        and that topics can be published to.
+        Each topic has a unique name identifier, which means the underlying topics can be changed in the configuration without changing your code.
 
-        The format of the configuration dict is as follows. XXX indicates a value that should be supplied:
+        The format of the configuration dict is as follows.
+        XXX indicates a value that should be supplied.
 
-        mqttconfig = {"broker": {"host": "XXX",
+        mqttconfig = {"broker”: {"host”: “XXX”,
                                  "port": XXX,
                                  "keepalive": XXX,
                                  "transport": "XXX",
@@ -36,12 +37,12 @@ class MQTTMessages:
               "publishto": [{"name": "XXX", "definition": {"topic": "XXX", "qos": XXX, "devicetypes": ["XXX", ...]}}]
               }
 
-        The "broker" section defines the MQTT broker which is to be connected to, consisting of:
-          . The 'host' name (or IP address)
-          . The broker 'port' number (e.g. 8883)
-          . The 'keepalive' time (e.g. 60) - the time the connection will be kept alive between messages
-          . The 'transport' being used (e.g. 'tfs', but could be 'websockets')
-          . The 'tlsversion' [optional] (e.g. 2), assuming TLS is being used
+        The "broker" section defines the MQTT broker that is to be connected to, consisting of:
+          . The 'host' name (or IP address).
+          . The broker 'port' number (e.g. 8883).
+          . The 'keepalive' time (e.g. 60) - the time the connection will be kept alive between messages.
+          . The 'transport' being used (e.g. 'tfs', but could be 'websockets').
+          . The 'tlsversion' [optional] (e.g. 2), assuming TLS is being used.
           . The absolute location of the 'certfile' [optional] if you are using certificates to secure the broker.
 
         The 'thisclient' section describes the local Client.
@@ -50,7 +51,8 @@ class MQTTMessages:
             to secure the topics.
           . The 'version' is the MQTT-Message version that both the Publisher and Subscriber are using.
             Both must match, but has no relation to the version of MQTT being used or the MQTT broker.
-          . The 'devicetypes' [optional] is a list of type of device the message is destined for. This
+          . The 'devicetypes' [optional] is a list of type of device the message is destined for.
+          This
             allows for shared topics between device types where messages can be destined for a subset of
             devices.
 
@@ -63,7 +65,8 @@ class MQTTMessages:
         The 'publishto' section lists the MQTT topics that your client can publish to.
           . The 'topic' is the MQTT topic to publish on.
           . 'qos' is the QOS of the topic (to be expanded)
-          . 'devicetypes' [optional] is a list of device types that the published message are destined for.
+          .
+          'devicetypes' [optional] is a list of device types that the published message are destined for.
 
     :type handlerclass: object
     :param handlerclass:
