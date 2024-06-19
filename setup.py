@@ -22,10 +22,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import find_packages, setup
+
+# try:
+#    from setuptools import setup
+# except ImportError:
+#    from distutils.core import setup
 
 classifiers = ['Development Status :: 4 - Beta',
                'Operating System :: POSIX :: Linux',
@@ -40,12 +42,12 @@ setup(
     version='0.1.4',
     author='Tim Richardson',
     author_email='tim@potton.me.uk',
-    description="""Python library for setting up and handling MQTT messages with a pre-described format""",
+    description='Python library for setting up and handling MQTT messages with a pre-described format',
     long_description=open('README.rst').read() + '\n' + open('CHANGELOG.txt').read(),
     license='MIT',
     keywords='Raspberry Pi MQTT',
     url='http://github.com/GeekyTim/MQTTMessages.git',
     classifiers=classifiers,
-    packages=['MQTTMessages'],
-    install_requires=['paho-mqtt']
+    packages=find_packages(),
+    install_requires=['paho-mqtt'],
 )
