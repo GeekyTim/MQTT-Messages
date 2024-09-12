@@ -12,11 +12,12 @@ class MQTTMessages:
     Creates an MQTT message handler that can send (publish) or receive (subscribe) to MQTT messages,
     and ensures they are destined for this device as well as being correctly formatted.
 
-    :type mqttconfig: dict
+    :type mqttconfig: Dict
     :param mqttconfig:
         A specially formatted dictionary that defines the MQTT broker, which topics are to be subscribed to
         and that topics can be published to.
-        Each topic has a unique name identifier, which means the underlying topics can be changed in the configuration without changing your code.
+        Each topic has a unique name identifier, which means the underlying topics can be changed in the configuration
+        without changing your code.
 
         The format of the configuration dict is as follows.
         XXX indicates a value that should be supplied.
@@ -47,11 +48,11 @@ class MQTTMessages:
 
         The 'thisclient' section describes the local Client.
           . The 'deviceid' is a unique name used by this client only.
-          . The 'username' and 'password' [optional] is used when the broker is using usernames/passwords
+          . The 'username' and 'password' [optional] are used when the broker is using usernames/passwords
             to secure the topics.
           . The 'version' is the MQTT-Message version that both the Publisher and Subscriber are using.
-            Both must match, but has no relation to the version of MQTT being used or the MQTT broker.
-          . The 'devicetypes' [optional] is a list of type of device the message is destined for.
+            Both must match, but have no relation to the version of MQTT being used or the MQTT broker.
+          . The 'devicetypes' [optional] is a list of types of devices the message is destined for.
           This
             allows for shared topics between device types where messages can be destined for a subset of
             devices.
@@ -66,14 +67,14 @@ class MQTTMessages:
           . The 'topic' is the MQTT topic to publish on.
           . 'qos' is the QOS of the topic (to be expanded)
           .
-          'devicetypes' [optional] is a list of device types that the published message are destined for.
+          'Devicetypes' [optional] is a list of device types that the published message is destined for.
 
-    :type handlerclass: object
+    :type handlerclass: Object
     :param handlerclass:
         A class that contains a method called 'messagehandler' which takes two parameters.
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
     """
-    __libversion = 1.4
+    __libversion = 1.5
 
     __hostname = socket.gethostname()
 
@@ -113,18 +114,21 @@ class MQTTMessages:
             self.__keepalive = mqttconfig["broker"]["keepalive"]
 
             self.__certfile = None
+            self.__tlsversion = None
+
             if self.__transport.lower() == "tcp":
-                self.__tlsversion = mqttconfig["broker"]["tlsversion"]
+                if "tlsversion" in mqttconfig["broker"]:
+                    self.__tlsversion = mqttconfig["broker"]["tlsversion"]
 
-            if "certfile" in mqttconfig["broker"]:
-                if os.path.isfile(mqttconfig["broker"]["certfile"]):
-                    self.__certfile = mqttconfig["broker"]["certfile"]
-            else:
-                raise AttributeError(f"The certificate file does not exist.\n"
-                                     f"Expected Location: {mqttconfig['broker']['certfile']}")
+                if "certfile" in mqttconfig["broker"]:
+                    if os.path.isfile(mqttconfig["broker"]["certfile"]):
+                        self.__certfile = mqttconfig["broker"]["certfile"]
+                    else:
+                        raise AttributeError(f"The certificate file does not exist.\n"
+                                             f"Expected Location: {mqttconfig['broker']['certfile']}")
 
-            if "selfcert" in mqttconfig["broker"]:
-                self.__selfcert = mqttconfig["broker"]["selfcert"]
+                if "selfcert" in mqttconfig["broker"]:
+                    self.__selfcert = mqttconfig["broker"]["selfcert"]
 
             # The queues that can be published to
             self.__publishqueues = mqttconfig["publishto"]
@@ -179,7 +183,8 @@ class MQTTMessages:
         """
         # Creates the MQTT object for this client
         try:
-            startclient = mqtt.Client(client_id=self.__deviceid, clean_session=True, transport=self.__transport)
+            startclient = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id=self.__deviceid, clean_session=True,
+                                      transport=self.__transport)
 
             if self.__transport.lower() == "tcp":
                 # Set the security
@@ -236,7 +241,7 @@ class MQTTMessages:
         """
         When a message is received, ensure that it is the correct format and
         call the message handler in the controlling class.
-        :type client: mqtt.client
+        :type client: Mqtt.client
         :type userdata: mqtt.userdata
         :type msg: mqtt.MQTTMessage
         """
@@ -272,7 +277,7 @@ class MQTTMessages:
 
     def __jsontodict(self, jsonmessage):
         """
-        Converts a JSON string, received from MQTT. to a python dictionary
+        Converts a JSON string, received from MQTT, to a python dictionary
         """
 
         try:
@@ -306,7 +311,7 @@ class MQTTMessages:
 
     def __isrightversion(self, message):
         """
-        Is the message the correct version for this program
+        Is the message the correct version for this program?
         """
         response = False
         if "version" in message["mqttmessage"]:
@@ -318,7 +323,7 @@ class MQTTMessages:
 
     def __haspayload(self, message):
         """
-        Does the message have a 'payload'
+        Does the message have a 'payload'?
         """
         response = False
         if "payload" in message["mqttmessage"]:

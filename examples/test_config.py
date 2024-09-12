@@ -4,12 +4,12 @@
 """
 Include this file in all programs you use with MQTT-MQTTMessages
 """
-mqttconfig = {"broker": {"host": "WDDrivePi.localdomain",
+mqttconfig = {"broker": {"host": "MQTTPi",
                          "port": 8883,
                          "keepalive": 60,
                          "transport": "tcp",
                          "tlsversion": 2,
-                         "certfile": "/home/pi/mqtt-serv.crt",
+                         "certfile": "/home/geekytim/servername.crt",
                          "selfcert": True},
               "thisclient": {"devicetypes": ["MotePi", "another"],
                              "deviceid": "testclient",
