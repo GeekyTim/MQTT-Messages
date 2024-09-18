@@ -5,17 +5,14 @@
 Include this file in all programs you use with MQTT-MQTTMessages
 """
 mqttconfig = {"broker": {"host": "MQTTPi",
-                         "port": 8883,
+                         "port": 1883,
                          "keepalive": 60,
-                         "transport": "tcp",
-                         "tlsversion": 2,
-                         "certfile": "/home/geekytim/servername.crt",
-                         "selfcert": True},
+                         "transport": "tcp"},
               "thisclient": {"devicetypes": ["MotePi", "another"],
                              "deviceid": "testclient",
                              "username": "testclient",
                              "password": "testclient",
-                             "version": 1.4},
+                             "version": 1.5},
               "subscribeto": [],
               "publishto": [{"name": "LavaLamp",
                              "definition": {"topic": "MotePi/command", "qos": 2, "devicetypes": ["MotePi", "other"]}}]

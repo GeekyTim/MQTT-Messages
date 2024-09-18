@@ -12,7 +12,7 @@ class MQTTMessages:
     Creates an MQTT message handler that can send (publish) or receive (subscribe) to MQTT messages,
     and ensures they are destined for this device as well as being correctly formatted.
 
-    :type mqttconfig: Dict
+    :type mqttconfig: dict
     :param mqttconfig:
         A specially formatted dictionary that defines the MQTT broker, which topics are to be subscribed to
         and that topics can be published to.
@@ -40,7 +40,7 @@ class MQTTMessages:
 
         The "broker" section defines the MQTT broker that is to be connected to, consisting of:
           . The 'host' name (or IP address).
-          . The broker 'port' number (e.g. 8883).
+          . The broker 'port' number (e.g. 1883).
           . The 'keepalive' time (e.g. 60) - the time the connection will be kept alive between messages.
           . The 'transport' being used (e.g. 'tfs', but could be 'websockets').
           . The 'tlsversion' [optional] (e.g. 2), assuming TLS is being used.
@@ -69,7 +69,7 @@ class MQTTMessages:
           .
           'Devicetypes' [optional] is a list of device types that the published message is destined for.
 
-    :type handlerclass: Object
+    :type handlerclass: object
     :param handlerclass:
         A class that contains a method called 'messagehandler' which takes two parameters.
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
@@ -241,7 +241,7 @@ class MQTTMessages:
         """
         When a message is received, ensure that it is the correct format and
         call the message handler in the controlling class.
-        :type client: Mqtt.client
+        :type client: mqtt.client
         :type userdata: mqtt.userdata
         :type msg: mqtt.MQTTMessage
         """
