@@ -230,12 +230,12 @@ class MQTTMessages:
         Subscribing in __on_connect() means that if the client loses the connection and
         reconnect then subscriptions will be renewed.
         """
-        self.__ocuserdata = userdata
-        self.__ocflags = flags
-        self.__ocrc = rc
-
-        for queue in self.__listenqueues:
-            client.subscribe(topic=queue["definition"]["topic"], qos=queue["definition"]["qos"])
+        if rc == 0:
+            for queue in self.__listenqueues:
+                client.subscribe(topic=queue["definition"]["topic"], qos=queue["definition"]["qos"])
+        else:
+            print(f"Connection Error (Client: {client}, User data: {userdata}, Flags: {flags}. rc: {rc})")
+            exit(rc)
 
     def __on_message(self, client, userdata, msg):
         """
@@ -258,18 +258,11 @@ class MQTTMessages:
 
     def __on_publish(self, client, obj, mid):
         """ What to do when a message is published """
-        self.__opclient = client
-        self.__opobj = obj
-        self.__opmid = mid
-
-        self.__log("Payload sent")
+        self.__log(f"Payload sent (Client: {client}, Object: {obj}, Mid: {mid})")
 
     def __on_log(self, client, obj, level, string):
         """ When a log is required """
-        self.__log(string)
-        self.__olclient = client
-        self.__olobj = obj
-        self.__ollevel = level
+        self.__log(f"{string} (Client: {client}, Object: {obj}, Level: {level})")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Message Checking and Generation
