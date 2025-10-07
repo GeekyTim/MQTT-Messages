@@ -5,6 +5,22 @@ import ssl
 
 import paho.mqtt.client as mqtt
 
+VERSION = 2.0
+
+HOST = socket.gethostname()
+
+MQTT_FORMAT = {
+    "mqttmessage": {
+        "devicetypes": [],
+        "version": VERSION,
+        "payload": {
+            "host": HOST,
+            "what": "whattodo",
+            "params": {}
+        }
+    }
+}
+
 
 class MQTTMessages:
     """
@@ -73,28 +89,13 @@ class MQTTMessages:
         A class that contains a method called 'messagehandler' which takes two parameters.
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
     """
-    __libversion = 2.0
 
-    __hostname = socket.gethostname()
-
-    __mqtt_message_format = {
-        "mqttmessage": {
-            "devicetypes": [],
-            "version"    : __libversion,
-            "payload"    : {
-                "host"  : __hostname,
-                "what"  : "whattodo",
-                "params": {}
-            }
-        }
-    }
-
-    def __init__(self, mqtt_config, handler_class=None):
+    def __init__(self, mqtt_config, handler_class=None, useasync=False):
         try:
-            if mqtt_config["thisclient"]["version"] > self.__libversion:
+            if mqtt_config["thisclient"]["version"] > VERSION:
                 raise ValueError(
                     f"The MQTT definition is not compatible with this library version. Please upgrade MQTT-Messages.\n"
-                    f"Installed version: {self.__libversion}, Expected Version: {mqtt_config['thisclient']['version']}")
+                    f"Installed version: {VERSION}, Expected Version: {mqtt_config['thisclient']['version']}")
 
             # This device
             self.__deviceid = mqtt_config["thisclient"]["deviceid"]
@@ -124,11 +125,11 @@ class MQTTMessages:
                     if os.path.isfile(mqtt_config["broker"]["certfile"]):
                         self.__certificate_file = mqtt_config["broker"]["certfile"]
                     else:
-                        raise AttributeError(f"The certificate file does not exist.\n"
-                                             f"Expected Location: {mqtt_config['broker']['certfile']}")
+                        raise AttributeError(
+                            f"The certificate file does not exist.\nExpected Location: {mqtt_config['broker']['certfile']}")
 
                 if "selfcert" in mqtt_config["broker"]:
-                    self.__selfcert = mqtt_config["broker"]["selfcert"]
+                    self.__self_cert = mqtt_config["broker"]["selfcert"]
 
             # The queues that can be published to
             self.__publish_topics = mqtt_config["publishto"]
@@ -194,8 +195,9 @@ class MQTTMessages:
                 # Set the security
                 if self.__tls_version is not None:
                     if self.__certificate_file is not None:
-                        if self.__selfcert:
-                            client.tls_set(self.__certificate_file, tls_version=self.__tls_version, cert_reqs=ssl.CERT_NONE)
+                        if self.__self_cert:
+                            client.tls_set(
+                                self.__certificate_file, tls_version=self.__tls_version, cert_reqs=ssl.CERT_NONE)
                         else:
                             client.tls_set(self.__certificate_file, tls_version=self.__tls_version)
                     else:
@@ -239,7 +241,8 @@ class MQTTMessages:
             print(f"Connection Error (Client: {client}, User data: {userdata}, Flags: {flags}. rc: {reason_code})")
             exit(reason_code)
 
-    def __on_subscribe(self, client, userdata, mid, reason_codes, properties):
+    @staticmethod
+    def __on_subscribe(client, userdata, mid, reason_codes, properties):
         for sub_result in reason_codes:
             if sub_result == 1:
                 pass
@@ -260,7 +263,7 @@ class MQTTMessages:
         self.__om_client = client
         self.__om_userdata = userdata
 
-        payload = self.__getpayload(msg.payload)
+        payload = self.__get_payload(msg.payload)
 
         if payload != {}:
             self.__log("Payload received")
@@ -280,28 +283,28 @@ class MQTTMessages:
     # Message Checking and Generation
     # ------------------------------------------------------------------------------------------------------------------
 
-    def __jsontodict(self, jsonmessage):
+    def __json_to_dict(self, json_message):
         """
         Converts a JSON string, received from MQTT, to a python dictionary
         """
 
         try:
-            message = json.loads(jsonmessage)
+            message = json.loads(json_message)
         except Exception as err:
-            self.__log(f"Unable to interpret the MQTT message: {jsonmessage}\n({err})")
+            self.__log(f"Unable to interpret the MQTT message: {json_message}\n({err})")
             message = None
 
         return message
 
     @staticmethod
-    def __ismqttmessage(message):
+    def __is_mqtt_message(message):
         """
         Returns true if 'mqttmessage' is in the message i.e. if it is likely to be using the predefined message
         format
         """
         return "mqttmessage" in message
 
-    def __isrightdevicetype(self, message):
+    def __is_right_device_type(self, message):
         """
         Is this message destined for this device?
         """
@@ -314,7 +317,7 @@ class MQTTMessages:
 
         return response
 
-    def __isrightversion(self, message):
+    def __is_right_version(self, message):
         """
         Is the message the correct version for this program?
         """
@@ -326,7 +329,7 @@ class MQTTMessages:
                 self.__log("Incorrect message version received.")
         return response
 
-    def __haspayload(self, message):
+    def __has_payload(self, message):
         """
         Does the message have a 'payload'?
         """
@@ -340,19 +343,19 @@ class MQTTMessages:
 
         return response
 
-    def __getpayload(self, mqttmessage):
+    def __get_payload(self, mqtt_message):
         """
         Extracts the message from MQTT queue message
         """
         payload = None
 
         try:
-            message_json = self.__jsontodict(mqttmessage)
+            message_json = self.__json_to_dict(mqtt_message)
 
-            if self.__ismqttmessage(message_json):
-                if self.__isrightdevicetype(message_json):
-                    if self.__isrightversion(message_json):
-                        if self.__haspayload(message_json):
+            if self.__is_mqtt_message(message_json):
+                if self.__is_right_device_type(message_json):
+                    if self.__is_right_version(message_json):
+                        if self.__has_payload(message_json):
                             payload = message_json["mqttmessage"]["payload"]
         except Exception as err:
             self.__log(f"Unable to read the received message. ({err})")
@@ -360,27 +363,27 @@ class MQTTMessages:
 
         return payload
 
-    def __makemessage(self, queuename, what, paramdict):
-        messagejson = ""
+    def __make_message(self, queue_name, what, param_dict):
+        message_json = ""
         if len(what) == 0:
             self.__log("The instruction is blank.")
         else:
-            if paramdict is None:
-                paramdict = {}
-            if isinstance(paramdict, dict):
-                message = self.__mqtt_message_format
+            if param_dict is None:
+                param_dict = {}
+            if isinstance(param_dict, dict):
+                message = MQTT_FORMAT
                 message["mqttmessage"]["payload"]["what"] = what
-                message["mqttmessage"]["payload"]["params"] = paramdict
-                message["mqttmessage"]["devicetypes"] = self.__publish_topics["name" == queuename]["definition"][
+                message["mqttmessage"]["payload"]["params"] = param_dict
+                message["mqttmessage"]["devicetypes"] = self.__publish_topics["name" == queue_name]["definition"][
                     "devicetypes"]
-                messagejson = self.__make_json_message(message)
+                message_json = self.__make_json_message(message)
             else:
                 self.__log("The parameters supplied were not a dictionary or 'None'.")
-        return messagejson
+        return message_json
 
-    def __make_json_message(self, messagedict):
+    def __make_json_message(self, message_dict):
         try:
-            message = json.dumps(messagedict)
+            message = json.dumps(message_dict)
         except Exception as err:
             self.__log(f"Unable to convert a message dictionary into JSON.\n{err}")
             message = None
@@ -396,7 +399,7 @@ class MQTTMessages:
     def sendmessage(self, sendqueuename, what, paramdict):
         for queue in self.__publish_topics:
             if queue["name"] == sendqueuename:
-                message = self.__makemessage(sendqueuename, what, paramdict)
+                message = self.__make_message(sendqueuename, what, paramdict)
                 if len(message) > 0:
                     self.__client.publish(queue["definition"]["topic"], message, queue["definition"]["qos"],
                                           retain=False)
