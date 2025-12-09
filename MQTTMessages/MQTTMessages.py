@@ -90,7 +90,7 @@ class MQTTMessages:
         The first is a string for the 'what' in the MQTT message, and a dict for the parameters in the message
     """
 
-    def __init__(self, mqtt_config, handler_class=None, useasync=False):
+    def __init__(self, mqtt_config, handler_class=None):
         try:
             if mqtt_config["thisclient"]["version"] > VERSION:
                 raise ValueError(
@@ -163,8 +163,8 @@ class MQTTMessages:
 
             # Start listening to the queue
             self.__client = self.__start_mqtt()
-            # self.__client.loop_start()
-            self.__client.loop_forever()
+            self.__client.loop_start()
+            # self.__client.loop_forever()
 
         except Exception as err:
             print(f"There is a problem with the provided configuration.\n{err}")
@@ -299,8 +299,8 @@ class MQTTMessages:
     @staticmethod
     def __is_mqtt_message(message):
         """
-        Returns true if 'mqttmessage' is in the message i.e. if it is likely to be using the predefined message
-        format
+        Returns true if 'mqttmessage' is in the message i.e. if it is likely
+        to be using the predefined message format
         """
         return "mqttmessage" in message
 
@@ -374,8 +374,7 @@ class MQTTMessages:
                 message = MQTT_FORMAT
                 message["mqttmessage"]["payload"]["what"] = what
                 message["mqttmessage"]["payload"]["params"] = param_dict
-                message["mqttmessage"]["devicetypes"] = self.__publish_topics["name" == queue_name]["definition"][
-                    "devicetypes"]
+                message["mqttmessage"]["devicetypes"] = self.__publish_topics["name" == queue_name]["definition"]["devicetypes"]
                 message_json = self.__make_json_message(message)
             else:
                 self.__log("The parameters supplied were not a dictionary or 'None'.")
@@ -401,8 +400,7 @@ class MQTTMessages:
             if queue["name"] == sendqueuename:
                 message = self.__make_message(sendqueuename, what, paramdict)
                 if len(message) > 0:
-                    self.__client.publish(queue["definition"]["topic"], message, queue["definition"]["qos"],
-                                          retain=False)
+                    self.__client.publish(queue["definition"]["topic"], message, queue["definition"]["qos"], retain=False)
                 else:
                     self.__log("The message could not be sent")
 
